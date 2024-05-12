@@ -129,3 +129,5 @@ def TV_estimation(sampleX, histY, bin_edges_Y, bin_num):
         
     distance, _ = quad(l1_distance, lower_bound, upper_bound, epsabs = 1e-3, points = bins, limit = (bin_num+1)*2)
     return distance    
+
+
