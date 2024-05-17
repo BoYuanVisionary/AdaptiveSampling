@@ -154,17 +154,17 @@ class SemiGaussianTarget(object):
     def density(self, x):
         temp_vector = np.matmul(self.inverse, x-self.mean)
         norm = np.sqrt(np.dot(temp_vector,temp_vector))
-        return np.exp(-norm**(self.alpha+1))
+        return 0.5*np.exp(-norm**(self.alpha+1))
     
     def zeroOrder(self, x):
         temp_vector = np.matmul(self.inverse, x-self.mean)
         norm = np.sqrt(np.dot(temp_vector,temp_vector))
-        return norm**(self.alpha+1)
+        return 0.5*norm**(self.alpha+1)
 
     def firstOrder(self, x):
         temp_vector = np.matmul(self.inverse, x-self.mean)
         norm = np.sqrt(np.dot(temp_vector,temp_vector))
-        return (self.alpha+1) * np.matmul(np.matmul(np.transpose(self.inverse), self.inverse), (x-self.mean)) * norm**(self.alpha-1)
+        return 0.5*(self.alpha+1) * np.matmul(np.matmul(np.transpose(self.inverse), self.inverse), (x-self.mean)) * norm**(self.alpha-1)
 
     def generateSample(self):
         v = np.random.gamma(shape = self.dimension / (self.alpha+1), scale = 1.0, size = 1)
@@ -174,37 +174,37 @@ class SemiGaussianTarget(object):
         sample = np.matmul(r*direction,self.cov ) + self.mean
         return sample
 
-# Here the dimension is the dimension of X components.
+
 class NFarget(object):
     # We assume alpha is 1
-    def __init__(self, dimension, prob):
-        self.dimension = dimension
-        self.Xdimension = dimension -1
+    def __init__(self):
+        self.dimension = 2
         self.alpha = 1
-        self.prob = prob
-        self.integral = (2*np.pi)**(self.Xdimension/2) * (6*np.pi)**(1/2)
+        self.prob = 1
+        # not important
         self.mean = 0
+        self.integral = 0
 
     def density(self, x):
-        return np.exp(-NFarget.zeroOrder(x))
+        return np.exp(-self.zeroOrder(x))
     
     def zeroOrder(self, x):
-        X = x[1:]
-        Z = x[0]
+        X = x[1]
+        Y = x[0]
         norm = np.dot(X,X)
-        return 1/6*Z**2 + self.Xdimension*Z/4 + 1/2*np.exp(-Z/2)*norm
+        return 1/6*Y**2 +  1/2*np.exp(-Y/2)*(X**2)
 
     def firstOrder(self, x):
-        gradient = np.zeros(self.dimension)
-        X = x[1:]
-        Z = x[0]
-        norm = np.dot(X,X)
-        gradient[0] = Z/3+self.Xdimension/4-norm/4*np.exp(-Z/2)
-        gradient[1:] = np.exp(-Z/2) * X
+        gradient = np.zeros(2)
+        X = x[1]
+        Y = x[0]
+        norm = X**2
+        gradient[0] = Y/3-norm/4*np.exp(-Y/2)
+        gradient[1] = np.exp(-Y/2) * X
         return gradient
         
     def generateSample(self):
-        sample = np.zeros(self.dimension)
+        sample = np.zeros(2)
         sample[0] = np.random.normal(0,np.sqrt(3))
-        sample[1,:] = np.random.multivariate_normal(mean = np.zeros(self.Xdimension), cov =  np.exp(sample[0] /2)*np.identity(self.Xdimension), size = 1)
+        sample[1] = np.random.normal(0, np.sqrt(np.exp(sample[0]/2)))
         return sample

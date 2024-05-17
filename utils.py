@@ -19,7 +19,7 @@ def generateInvertibleMatrixConditional(dimension,large_condition=True):
 def target_func(dimension, if_simple = True):
     
     if if_simple == True:
-        t1 = targets.SemiGaussianTarget(dimension = dimension, mean = np.zeros(dimension), inverse = np.identity(dimension), alpha = 1 , prob = 1)
+        t1 = targets.SemiGaussianTarget(dimension = dimension, mean = np.zeros(dimension), inverse = 2 * np.identity(dimension), alpha = 1 , prob = 1)
         Target = targets.TargetMixture(t1)
 
     if if_simple == False:
@@ -29,11 +29,16 @@ def target_func(dimension, if_simple = True):
         a = a[0,:]
         
         
-        t1 = targets.SemiGaussianTarget(dimension = dimension, mean = a, inverse = np.identity(dimension), alpha = 1 , prob = 0.5)
-        t2 = targets.SemiGaussianTarget(dimension = dimension, mean = -a, inverse = np.identity(dimension), alpha = 1 , prob = 0.5)
+        t1 = targets.SemiGaussianTarget(dimension = dimension, mean = a, inverse = np.identity(dimension), alpha = 1 , prob = 1/2)
+        t2 = targets.SemiGaussianTarget(dimension = dimension, mean = -a, inverse = np.identity(dimension), alpha = 1 , prob = 1/2)
         Target = targets.TargetMixture(t1,t2)
     
     return Target
+
+def target_funnel():
+    
+    t = targets.NFarget()
+    return targets.TargetMixture(t)
 
 def mixing_time(samples, sampler, f, direction, realSamples):
     dimension = f.dimension
