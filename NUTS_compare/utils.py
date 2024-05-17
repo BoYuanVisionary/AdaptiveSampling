@@ -138,15 +138,41 @@ def TV_estimation(sampleX, histY, bin_edges_Y, bin_num):
     return distance    
 
 
+# def estimate_W2_Gaussian(samples, trueMean, trueCov):
+#     est_mean = np.mean(samples,axis=0)
+#     w2s = []
+#     iteration = samples.shape[1]
+#     for j in range(iteration):
+#         current_samples = samples[:,j,:]
+#         emMean = est_mean[j,:]
+#         emCov = EmpiricalCovariance(assume_centered=False).fit(current_samples).covariance_ 
+#         w = np.sqrt(np.linalg.norm(emMean - trueMean, ord=2) ** 2 +
+#                    np.trace(emCov + trueCov - 2 * scipy.linalg.sqrtm(scipy.linalg.sqrtm(emCov) @ trueCov @ scipy.linalg.sqrtm(emCov))))
+#         w2s.append(w)
+#     return w2s
+
 def estimate_W2_Gaussian(samples, trueMean, trueCov):
-    est_mean = np.mean(samples,axis=0)
+    # samples shape: (n_samples, n_dimensions, n_features)
+    est_mean = np.mean(samples, axis=0)  # shape: (n_dimensions, n_features)
     w2s = []
-    iteration = samples.shape[1]
-    for j in range(iteration):
-        current_samples = samples[:,j,:]
-        emMean = est_mean[j,:]
-        emCov = EmpiricalCovariance(assume_centered=False).fit(current_samples).covariance_ 
-        w = np.sqrt(np.linalg.norm(emMean - trueMean, ord=2) ** 2 +
-                   np.trace(emCov + trueCov - 2 * scipy.linalg.sqrtm(scipy.linalg.sqrtm(emCov) @ trueCov @ scipy.linalg.sqrtm(emCov))))
+    n_samples, n_dimensions, n_features = samples.shape
+
+    for j in range(n_dimensions):
+        current_samples = samples[:, j, :]  # shape: (n_samples, n_features)
+        emMean = est_mean[j, :]  # shape: (n_features,)
+        emCov = EmpiricalCovariance(assume_centered=False).fit(current_samples).covariance_  # shape: (n_features, n_features)
+        
+        # Ensure covariance matrices are positive semi-definite
+        emCov = (emCov + emCov.T) / 2
+        trueCov = (trueCov + trueCov.T) / 2
+        
+        # Compute the Wasserstein-2 distance
+        sqrt_emCov = scipy.linalg.sqrtm(emCov)
+        term = scipy.linalg.sqrtm(sqrt_emCov @ trueCov @ sqrt_emCov)
+        w = np.sqrt(np.linalg.norm(emMean - trueMean, ord=2) ** 2 + np.trace(emCov + trueCov - 2 * term))
         w2s.append(w)
+        w_imaginary = np.imag(w)
+        if np.abs(w_imaginary) > 0.01:
+            print(f"warning: imaginary part:{w_imaginary}")
+
     return w2s
