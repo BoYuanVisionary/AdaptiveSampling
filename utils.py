@@ -19,7 +19,7 @@ def generateInvertibleMatrixConditional(dimension,large_condition=True):
 def target_func(dimension, if_simple = True):
     
     if if_simple == True:
-        t1 = targets.SemiGaussianTarget(dimension = dimension, mean = np.zeros(dimension), inverse = 2 * np.identity(dimension), alpha = 1 , prob = 1)
+        t1 = targets.SemiGaussianTarget(dimension = dimension, mean = np.zeros(dimension), inverse = np.identity(dimension), alpha = 1 , prob = 1)
         Target = targets.TargetMixture(t1)
 
     if if_simple == False:

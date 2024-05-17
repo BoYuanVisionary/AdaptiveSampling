@@ -334,7 +334,7 @@ def nuts6(f, M, Madapt, theta0, delta=0.6, progress=False):
             epsilonbar = exp((1. - eta) * log(epsilonbar) + eta * log(epsilon))
         else:
             epsilon = epsilonbar
-    samples = samples[Madapt:, :]
+    # samples = samples[Madapt:, :]
     lnprob = lnprob[Madapt:]
     return samples, lnprob, epsilon
 
