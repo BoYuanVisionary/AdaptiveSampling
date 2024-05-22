@@ -35,6 +35,18 @@ def target_func(dimension, if_simple = True):
     
     return Target
 
+
+def target_Gaussian(dimension):
+    
+    H = np.random.randn(dimension, dimension)
+    Q, R = np.linalg.qr(H)
+    Q = Q @ np.diag(np.sign(np.diag(R)))
+
+    t1 = targets.SemiGaussianTarget(dimension = dimension, mean = np.zeros(dimension), inverse = Q, alpha = 1 , prob = 1)
+    Target = targets.TargetMixture(t1)
+
+    return Target
+
 def target_funnel():
     
     t = targets.NFarget()
