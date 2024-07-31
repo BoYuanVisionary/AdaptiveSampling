@@ -25,7 +25,7 @@ class TargetMixture(object):
         self.means = np.zeros([int(self.dimension),len(args)])
         for i, item in enumerate(args):
             self.means[:,i] = item.mean
-        self.mean = np.matmul(self.means,self.probs) / np.inner(self.probs, integrals)
+        # self.mean = np.matmul(self.means,self.probs) / np.inner(self.probs, integrals)
         # Take the maximal alphas of all components as the parameter of the mixtured one
         self.alpha = np.max(alphas)
         self.args = args
@@ -177,8 +177,8 @@ class SemiGaussianTarget(object):
 
 class NFarget(object):
     # We assume alpha is 1
-    def __init__(self):
-        self.dimension = 2
+    def __init__(self, dimension):
+        self.dimension = dimension
         self.alpha = 1
         self.prob = 1
         # not important
@@ -189,22 +189,23 @@ class NFarget(object):
         return np.exp(-self.zeroOrder(x))
     
     def zeroOrder(self, x):
-        X = x[1]
+        X = x[1:]
         Y = x[0]
         norm = np.dot(X,X)
-        return 1/6*Y**2 +  1/2*np.exp(-Y/2)*(X**2)
+        return 1/6*Y**2 +  1/2*np.exp(-Y/2)*norm
 
     def firstOrder(self, x):
-        gradient = np.zeros(2)
-        X = x[1]
+        gradient = np.zeros(self.dimension)
+        X = x[1:]
         Y = x[0]
-        norm = X**2
+        norm = np.dot(X,X)
         gradient[0] = Y/3-norm/4*np.exp(-Y/2)
-        gradient[1] = np.exp(-Y/2) * X
+        gradient[1:] = np.exp(-Y/2) * X
         return gradient
         
     def generateSample(self):
-        sample = np.zeros(2)
+        sample = np.zeros(self.dimension)
         sample[0] = np.random.normal(0,np.sqrt(3))
-        sample[1] = np.random.normal(0, np.sqrt(np.exp(sample[0]/2)))
+        cov = np.identity(self.dimension-1) * np.exp(sample[0]/2)
+        sample[1:] = np.random.multivariate_normal( np.zeros(self.dimension-1), cov, 1)
         return sample

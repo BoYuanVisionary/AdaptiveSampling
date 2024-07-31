@@ -35,9 +35,14 @@ def target_func(dimension, if_simple = True):
     
     return Target
 
-def target_funnel():
+def target_banana(dimension):
     
-    t = targets.NFarget()
+    t1 = targets.NFarget(dimension)
+    return Target
+
+def target_funnel(dimension):
+    
+    t = targets.NFarget(dimension)
     return targets.TargetMixture(t)
 
 def mixing_time(samples, sampler, f, direction, realSamples):
