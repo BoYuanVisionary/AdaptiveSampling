@@ -1,1 +1,0 @@
-Experiment results are in /fixed_compare/run.ipynb and NUTS.compare/compare.ipynb
